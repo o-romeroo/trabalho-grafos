@@ -49,6 +49,7 @@ class Graph:
         def dfs_recursive(v):
             visited.add(v)
             time[0] += 1
+            print(time, v)
             discovery_time[v] = time[0]
             
             # Itera sobre as arestas do vértice atual
@@ -82,6 +83,27 @@ class Edge:
         self.rotulo = rotulo
         self.peso = peso 
 
+    def __repr__(self):
+        return f"({self.u}, {self.v}, {self.rotulo}, {self.peso})"
+
+
+
+g = Graph(5, directed=True)
+
+# Adicionando algumas arestas ao grafo
+g.adiciona_aresta(1, 2, 'A', 1.0)
+g.adiciona_aresta(2, 3, 'B', 2.0)
+g.adiciona_aresta(3, 4, 'C', 3.0)
+g.adiciona_aresta(4, 2, 'D', 4.0)  # Esta deve ser uma aresta de retorno
+g.adiciona_aresta(3, 5, 'E', 5.0)
+
+print("\nIniciando DFS a partir do vértice 1:")
+g.dfs(1)
+
+# Mostrando as arestas classificadas
+print("\nArestas de Retorno:", g.arestas_retorno)
+print("Arestas de Avanço:", g.arestas_avanco)
+print("Arestas de Cruzamento:", g.arestas_cruzamento)
 
 
 
@@ -89,20 +111,3 @@ class Edge:
 
 
 
-
-
-
-
-
-
-
-
-
-# g = Graph(5,True)
-
-# g.adiciona_aresta(1, 2, 'A',1.0)
-# g.adiciona_aresta(1, 3,'B',2.0)
-# g.adiciona_aresta(1, 4,'C',3.0)
-
-
-# g.matriz_incidencia()
