@@ -8,20 +8,39 @@ class Graph:
         self.arestas_cruzamento = []
 
     def adiciona_aresta(self, u, v, rotulo="", peso=0.0):
+        if(u < 1 or u > self.vertices or v < 1 or v > self.vertices):
+            raise ValueError("Vértice inválido")
+
         aresta = Edge(u, v, rotulo, peso)
         self.arestas[u - 1].append(aresta)
         if not self.directed:
             aresta_inversa = Edge(v, u, rotulo, peso)
             self.arestas[v - 1].append(aresta_inversa)
 
-    def remove_aresta(self, u, v):
-        self.arestas[u - 1] = [aresta for aresta in self.arestas[u - 1] if aresta.v != v]
-        if not self.directed:
-            self.arestas[v - 1] = [aresta for aresta in self.arestas[v - 1] if aresta.v != u]
+    def remove_aresta(self, origem, destino):
+        if(origem < 1 or origem > self.vertices or destino < 1 or destino > self.vertices):
+            raise ValueError("Vértice inválido")
+        
+        for aresta in enumerate(self.arestas):
+            if(aresta[1].__len__()):
+                for i in range(aresta[1].__len__()):
+                    if(aresta[1][i].u == origem and aresta[1][i].v == destino):
+                        del self.arestas[aresta[0]][i]
+                        if(self.directed == False):
+                            for aresta2 in enumerate(self.arestas):
+                                if(aresta2[1].__len__()):
+                                    for j in range(aresta2[1].__len__()):
+                                        if(aresta2[1][j].u == destino and aresta2[1][j].v == origem):
+                                            del self.arestas[aresta2[0]][j]
+                                            break
+        
+
+                    
 
     def mostra_arestas(self):
         for i in range(self.vertices):
-            print(f"Vértice {i + 1}: {self.arestas[i]}")
+            if(self.arestas[i].__len__()):
+                print(f"Vértice {i + 1}: {self.arestas[i]}")
 
     def matriz_incidencia(self):
         matriz = [[0] * self.vertices for _ in range(self.vertices)]
@@ -88,22 +107,32 @@ class Edge:
 
 
 
-g = Graph(5, directed=True)
+g = Graph(5, directed=False)
 
 # Adicionando algumas arestas ao grafo
+print("Adicionando arestas:")
 g.adiciona_aresta(1, 2, 'A', 1.0)
-g.adiciona_aresta(2, 3, 'B', 2.0)
-g.adiciona_aresta(3, 4, 'C', 3.0)
-g.adiciona_aresta(4, 2, 'D', 4.0)  # Esta deve ser uma aresta de retorno
-g.adiciona_aresta(3, 5, 'E', 5.0)
 
-print("\nIniciando DFS a partir do vértice 1:")
-g.dfs(1)
+print('Mostrando Arestas:')
+g.mostra_arestas()
+# g.adiciona_aresta(1,3, 'B', 1.0)
+# g.adiciona_aresta(2,3, 'C', 1.0)
 
-# Mostrando as arestas classificadas
-print("\nArestas de Retorno:", g.arestas_retorno)
-print("Arestas de Avanço:", g.arestas_avanco)
-print("Arestas de Cruzamento:", g.arestas_cruzamento)
+
+print('removendo Arestas:')
+g.remove_aresta(1,2)
+
+
+print('Mostrando Arestas:')
+g.mostra_arestas()
+
+# print("\nIniciando DFS a partir do vértice 1:")
+# g.dfs(1)
+
+# # Mostrando as arestas classificadas
+# print("\nArestas de Retorno:", g.arestas_retorno)
+# print("Arestas de Avanço:", g.arestas_avanco)
+# print("Arestas de Cruzamento:", g.arestas_cruzamento)
 
 
 
