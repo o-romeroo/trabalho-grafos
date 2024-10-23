@@ -96,15 +96,23 @@ class Graph:
 
 
 class Edge:
-    def __init__(self, u, v, rotulo, peso):
-        self.u = u
-        self.v = v
+    def __init__(self, origem, destino, rotulo, peso):
+        self.origem = origem
+        self.destino = destino
         self.rotulo = rotulo
         self.peso = peso 
 
     def __repr__(self):
-        return f"({self.u}, {self.v}, {self.rotulo}, {self.peso})"
+        return f"({self.origem}, {self.destino}, {self.rotulo}, {self.peso})"
 
+class Vertex:
+    def __init__(self, rotulo):
+        self.rotulo = rotulo
+        self.visitado = False
+        self.processado = False
+
+    def __repr__(self):
+        return f"{self.rotulo}"
 
 
 g = Graph(5, directed=False)
