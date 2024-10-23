@@ -2,108 +2,107 @@ class Graph:
     def __init__(self, vertices, directed=False):
         self.vertices = vertices
         self.directed = directed
-        self.arestas = [[] for _ in range(self.vertices)]
+        self.arestas = [[] for _ in range(len(self.vertices))]
         self.arestas_retorno = []
         self.arestas_avanco = []
         self.arestas_cruzamento = []
 
-    def adiciona_aresta(self, u, v, rotulo="", peso=0.0):
-        if(u < 1 or u > self.vertices or v < 1 or v > self.vertices):
+    def adiciona_aresta(self, origem, destino, rotulo="", peso=0.0):
+        if origem not in self.vertices or destino not in self.vertices:
             raise ValueError("Vértice inválido")
 
-        aresta = Edge(u, v, rotulo, peso)
-        self.arestas[u - 1].append(aresta)
+        origem_idx = self.vertices.index(origem)
+        destino_idx = self.vertices.index(destino)
+
+        aresta = Edge(origem_idx + 1, destino_idx + 1, rotulo, peso)
+        self.arestas[origem_idx].append(aresta)
         if not self.directed:
-            aresta_inversa = Edge(v, u, rotulo, peso)
-            self.arestas[v - 1].append(aresta_inversa)
+            aresta_inversa = Edge(destino_idx + 1, origem_idx + 1, rotulo, peso)
+            self.arestas[destino_idx].append(aresta_inversa)
 
     def remove_aresta(self, origem, destino):
-        if(origem < 1 or origem > self.vertices or destino < 1 or destino > self.vertices):
+        if origem not in self.vertices or destino not in self.vertices:
             raise ValueError("Vértice inválido")
         
-        for aresta in enumerate(self.arestas):
-            if(aresta[1].__len__()):
-                for i in range(aresta[1].__len__()):
-                    if(aresta[1][i].u == origem and aresta[1][i].v == destino):
-                        del self.arestas[aresta[0]][i]
-                        if(self.directed == False):
-                            for aresta2 in enumerate(self.arestas):
-                                if(aresta2[1].__len__()):
-                                    for j in range(aresta2[1].__len__()):
-                                        if(aresta2[1][j].u == destino and aresta2[1][j].v == origem):
-                                            del self.arestas[aresta2[0]][j]
-                                            break
-        
+        origem_idx = self.vertices.index(origem)
+        destino_idx = self.vertices.index(destino)
 
-                    
+        for aresta in self.arestas[origem_idx]:
+            if aresta.v == destino_idx + 1:
+                self.arestas[origem_idx].remove(aresta)
+                break
+
+        if not self.directed:
+            for aresta in self.arestas[destino_idx]:
+                if aresta.v == origem_idx + 1:
+                    self.arestas[destino_idx].remove(aresta)
+                    break
 
     def mostra_arestas(self):
-        for i in range(self.vertices):
-            if(self.arestas[i].__len__()):
-                print(f"Vértice {i + 1}: {self.arestas[i]}")
+        for i, vertex in enumerate(self.vertices):
+            if len(self.arestas[i]) > 0:
+                print(f"Vértice {vertex.rotulo} (Índice {i + 1}): {self.arestas[i]}")
 
     def matriz_incidencia(self):
-        matriz = [[0] * self.vertices for _ in range(self.vertices)]
+        matriz = [[0] * len(self.vertices) for _ in range(len(self.vertices))]
         
-        for i in range(self.vertices):
+        for i in range(len(self.vertices)):
             for aresta in self.arestas[i]:
                 matriz[i][aresta.v - 1] = 1
 
         return matriz
 
     def mostra_matriz(self):
-        for i in range(self.vertices):
-            print(self.grafo[i])
+        matriz = self.matriz_incidencia()
+        for row in matriz:
+            print(row)
 
     def dfs(self, start):
-        # Conjunto para armazenar os vértices visitados
+        if start not in self.vertices:
+            raise ValueError("Vértice inicial inválido")
+
         visited = set()
-        # Dicionário para armazenar o tempo de descoberta e finalização
         discovery_time = {}
         finishing_time = {}
-        # Contador de tempo
         time = [0]
-        
-        # Função recursiva interna para visitar os vértices
+
         def dfs_recursive(v):
             visited.add(v)
             time[0] += 1
-            print(time, v)
             discovery_time[v] = time[0]
-            
-            # Itera sobre as arestas do vértice atual
-            for edge in self.arestas[v - 1]:
-                if edge.v not in visited:
-                    # Aresta de árvore
-                    dfs_recursive(edge.v)
+            print(f"Visitando {v.rotulo}, tempo de descoberta: {time[0]}")
+
+            v.visitado = True
+
+            v_idx = self.vertices.index(v)
+            for edge in self.arestas[v_idx]:
+                next_vertex = self.vertices[edge.v - 1]
+                if next_vertex not in visited:
+                    dfs_recursive(next_vertex)
                 else:
-                    # Verifica o tipo da aresta
-                    if edge.v in discovery_time and edge.v not in finishing_time:
-                        # Aresta de retorno: conecta um vértice a um de seus ancestrais
+                    if next_vertex in discovery_time and next_vertex not in finishing_time:
                         self.arestas_retorno.append(edge)
-                    elif discovery_time[v] < discovery_time[edge.v]:
-                        # Aresta de avanço: conecta um vértice a um descendente indireto
+                    elif discovery_time[v] < discovery_time[next_vertex]:
                         self.arestas_avanco.append(edge)
                     else:
-                        # Aresta de cruzamento: conecta vértices de diferentes subárvores
                         self.arestas_cruzamento.append(edge)
-            
+
             time[0] += 1
             finishing_time[v] = time[0]
+            print(f"Finalizando {v.rotulo}, tempo de término: {time[0]}")
     
-        # Inicia a DFS a partir do vértice inicial
         dfs_recursive(start)
 
 
 class Edge:
     def __init__(self, origem, destino, rotulo, peso):
         self.origem = origem
-        self.destino = destino
+        self.v = destino
         self.rotulo = rotulo
         self.peso = peso 
 
     def __repr__(self):
-        return f"({self.origem}, {self.destino}, {self.rotulo}, {self.peso})"
+        return f"({self.origem}, {self.v}, {self.rotulo}, {self.peso})"
 
 class Vertex:
     def __init__(self, rotulo):
@@ -115,36 +114,30 @@ class Vertex:
         return f"{self.rotulo}"
 
 
-g = Graph(5, directed=False)
+# Criando vértices
+v1 = Vertex("A")
+v2 = Vertex("B")
+v3 = Vertex("C")
+v4 = Vertex("D")
+v5 = Vertex("E")
 
-# Adicionando algumas arestas ao grafo
-print("Adicionando arestas:")
-g.adiciona_aresta(1, 2, 'A', 1.0)
+# Criando um grafo usando os vértices
+g = Graph([v1, v2, v3, v4, v5], directed=True)
 
-print('Mostrando Arestas:')
-g.mostra_arestas()
-# g.adiciona_aresta(1,3, 'B', 1.0)
-# g.adiciona_aresta(2,3, 'C', 1.0)
+# Adicionando arestas
+g.adiciona_aresta(v1, v5, "aresta_1", 1.0)
 
-
-print('removendo Arestas:')
-g.remove_aresta(1,2)
-
-
-print('Mostrando Arestas:')
 g.mostra_arestas()
 
-# print("\nIniciando DFS a partir do vértice 1:")
-# g.dfs(1)
+g.remove_aresta(v1, v5)
 
-# # Mostrando as arestas classificadas
-# print("\nArestas de Retorno:", g.arestas_retorno)
-# print("Arestas de Avanço:", g.arestas_avanco)
-# print("Arestas de Cruzamento:", g.arestas_cruzamento)
+g.mostra_arestas()
+# g.adiciona_aresta(v1, v3, "aresta_2", 2.0)
+# g.adiciona_aresta(v2, v4, "aresta_3", 3.0)
+# g.adiciona_aresta(v3, v5, "aresta_4", 4.0)
 
+# Mostrando arestas
+# g.mostra_arestas()
 
-
-
-
-
-
+# # Executando a DFS a partir do vértice A
+# g.dfs(v1)
